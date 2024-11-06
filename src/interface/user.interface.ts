@@ -8,14 +8,14 @@ export interface IUser {
     url: string;
   };
   role: 'user' | 'admin';
-  verifyCode: string;
+  verifyCode?: string;
   isVerified: boolean;
-  verifyCodeExpire: Date;
-  resetPasswordToken: string;
-  resetPasswordExpire: Date;
-  resetPasswordTokenExpire: Date;
-  forgotPasswordToken: string;
-  forgotPasswordTokenExpire: Date;
+  verifyCodeExpire?: Date;
+  resetPasswordToken?: string;
+  resetPasswordExpire?: Date;
+  resetPasswordTokenExpire?: Date;
+  forgotPasswordToken?: string;
+  forgotPasswordTokenExpire?: Date;
   createdAt: Date;
   updatedAt: Date;
 }

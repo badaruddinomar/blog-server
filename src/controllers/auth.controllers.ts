@@ -10,6 +10,8 @@ import { verifyEmailTemplate } from '../emailTemplates/verifyEmailTemplate';
 import crypto from 'crypto';
 import { forgotPasswordEmailTemplate } from '../emailTemplates/forgotPassEmailTemplate';
 import config from '../config';
+import { uploadSingleImage } from '../utils/cloudinaryImageUpload';
+import { UploadedFile } from 'express-fileupload';
 
 export const signup: RequestHandler = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -19,7 +21,14 @@ export const signup: RequestHandler = catchAsync(
     if (user) {
       throw next(new AppError(httpStatus.BAD_REQUEST, 'User already exists!'));
     }
-
+    // upload image--
+    let avatar;
+    if (req.files?.avatar) {
+      avatar = await uploadSingleImage(
+        req.files?.avatar as UploadedFile,
+        'avatars',
+      );
+    }
     // hash password--
     const salt = await bcryptjs.genSalt(10);
     const hashedPassword = await bcryptjs.hash(password, salt);
@@ -27,6 +36,7 @@ export const signup: RequestHandler = catchAsync(
     const newUser = await User.create({
       name,
       email,
+      avatar,
       password: hashedPassword,
     });
     // create verify token--
