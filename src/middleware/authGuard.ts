@@ -34,7 +34,7 @@ export const authorizeRoles = (...roles: string[]) => {
       return next(
         new AppError(
           httpStatus.FORBIDDEN,
-          `Role ${req.user.role} is not allowed to access this resource.`,
+          `You are not allowed to access this resource`,
         ),
       );
     }

@@ -17,6 +17,7 @@
   "author": "Badar Uddin Omar",
   "license": "ISC",
   "dependencies": {
+    "@faker-js/faker": "^9.2.0",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^2.5.1",
     "compression": "^1.7.4",

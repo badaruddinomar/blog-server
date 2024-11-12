@@ -4,6 +4,6 @@ import { authorizeRoles, isAuthenticatedUser } from '../middleware/authGuard';
 
 const router = express.Router();
 
-router.post('/all', isAuthenticatedUser, authorizeRoles('admin'), getAllUsers);
+router.get('/all', isAuthenticatedUser, authorizeRoles('admin'), getAllUsers);
 
 export default router;
