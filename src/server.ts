@@ -10,7 +10,6 @@ import globalErrorHandler from './middleware/globarErrorHandler';
 import authRoutes from './routes/auth.routes';
 import userRoutes from './routes/user.route';
 import fileUpload from 'express-fileupload';
-import { generateFakeUsers } from './utils/generateFakeData';
 
 const app: Application = express();
 

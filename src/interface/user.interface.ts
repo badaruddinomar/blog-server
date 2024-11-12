@@ -19,3 +19,10 @@ export interface IUser {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface IUserSearchQuery {
+  name?: {
+    $regex: string;
+    $options: string;
+  };
+}
