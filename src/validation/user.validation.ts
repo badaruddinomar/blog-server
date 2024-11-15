@@ -1,4 +1,3 @@
-import { updateUser } from './../controllers/user.controllers';
 import { z } from 'zod';
 
 export const userSchema = z.object({

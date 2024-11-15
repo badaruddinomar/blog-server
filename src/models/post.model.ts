@@ -6,7 +6,7 @@ const postSchema = new mongoose.Schema<IPost>(
     author: {
       type: mongoose.Types.ObjectId,
       ref: 'User',
-      required: [true, 'User id is required'],
+      required: [true, 'Author id is required'],
     },
     content: {
       type: String,
