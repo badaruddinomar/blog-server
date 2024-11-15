@@ -102,3 +102,26 @@ export const updatePost = catchAsync(
     });
   },
 );
+
+export const deletePost = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+    if (!id) throw new AppError(httpStatus.BAD_REQUEST, 'Post id is required');
+    const post = await Post.findById(id);
+    if (!post) throw new AppError(httpStatus.BAD_REQUEST, 'Post not found');
+    const isAuthorOrAdmin =
+      req.user._id.toString() === post.author.toString() ||
+      req.user.role === 'admin';
+    if (!isAuthorOrAdmin) {
+      throw next(
+        new AppError(httpStatus.FORBIDDEN, 'You are not permitted to delete'),
+      );
+    }
+    await deleteSingleImage(post?.banner.public_id as string);
+    await Post.findByIdAndDelete(id);
+    res.status(httpStatus.OK).json({
+      success: true,
+      message: 'Post deleted successfully',
+    });
+  },
+);
