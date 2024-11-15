@@ -2,7 +2,10 @@ import { Request, Response, NextFunction } from 'express';
 import catchAsync from '../utils/catchAsyn';
 import httpStatus from 'http-status';
 import Post from '../models/post.model';
-import { uploadSingleImage } from '../utils/cloudinaryImageUpload';
+import {
+  deleteSingleImage,
+  uploadSingleImage,
+} from '../utils/cloudinaryImageUpload';
 import { UploadedFile } from 'express-fileupload';
 import { generateSlug } from '../utils/generateSlug';
 import AppError from '../utils/AppError';
@@ -59,3 +62,43 @@ export const getSinglePost = catchAsync(async (req: Request, res: Response) => {
     data: post,
   });
 });
+
+export const updatePost = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+    if (!id) throw new AppError(httpStatus.BAD_REQUEST, 'Post id is required');
+    const post = await Post.findById(id);
+    if (!post) throw new AppError(httpStatus.BAD_REQUEST, 'Post not found');
+    const isAuthorIdMatch = req.user._id.toString() === post.author.toString();
+    if (!isAuthorIdMatch) {
+      throw next(
+        new AppError(httpStatus.FORBIDDEN, 'You are not permitted to update'),
+      );
+    }
+    let banner;
+    if (req.files?.banner) {
+      await deleteSingleImage(post?.banner.public_id as string);
+      banner = await uploadSingleImage(
+        req.files?.banner as UploadedFile,
+        'banners',
+      );
+    }
+    const updatedPost = await Post.findByIdAndUpdate(
+      id,
+      {
+        title: req.body.title,
+        slug: generateSlug(req.body.title),
+        content: req.body.content,
+        category: req.body.category,
+        banner: req.files?.banner ? banner : post?.banner,
+      },
+      { new: true },
+    );
+
+    res.status(httpStatus.OK).json({
+      success: true,
+      message: 'Post updated successfully',
+      data: updatedPost,
+    });
+  },
+);

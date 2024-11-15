@@ -3,6 +3,7 @@ import {
   createPost,
   getAllPosts,
   getSinglePost,
+  updatePost,
 } from '../controllers/post.controllers';
 import { isAuthenticatedUser } from '../middleware/authGuard';
 import validateRequest from '../middleware/validateRequest';
@@ -18,5 +19,6 @@ router.post(
 );
 router.get('/all', getAllPosts);
 router.get('/single/:id', getSinglePost);
+router.put('/update/:id', isAuthenticatedUser, updatePost);
 
 export default router;
