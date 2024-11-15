@@ -1,5 +1,9 @@
 import express from 'express';
-import { createPost, getAllPosts } from '../controllers/post.controllers';
+import {
+  createPost,
+  getAllPosts,
+  getSinglePost,
+} from '../controllers/post.controllers';
 import { isAuthenticatedUser } from '../middleware/authGuard';
 import validateRequest from '../middleware/validateRequest';
 import { postSchema } from '../validation/post.validation';
@@ -13,5 +17,6 @@ router.post(
   createPost,
 );
 router.get('/all', getAllPosts);
+router.get('/single/:id', getSinglePost);
 
 export default router;

@@ -48,3 +48,14 @@ export const getAllPosts = catchAsync(async (req: Request, res: Response) => {
     data: posts,
   });
 });
+
+export const getSinglePost = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  if (!id) throw new AppError(httpStatus.BAD_REQUEST, 'Post id is required');
+  const post = await Post.findById(id);
+  if (!post) throw new AppError(httpStatus.BAD_REQUEST, 'Post not found');
+  res.status(httpStatus.OK).json({
+    success: true,
+    data: post,
+  });
+});
