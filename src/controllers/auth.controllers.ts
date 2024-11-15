@@ -58,11 +58,11 @@ export const signup: RequestHandler = catchAsync(
       body: verifyEmailTemplate(verificationCode),
     });
     // send response to client--
-    const { password: _password, ...userDataWithPass } = newUser.toObject();
+    const { password: _password, ...userData } = newUser.toObject();
     res.status(httpStatus.CREATED).json({
       success: true,
       message: 'user created successfully',
-      data: userDataWithPass,
+      data: userData,
     });
   },
 );
@@ -109,11 +109,11 @@ export const signin: RequestHandler = catchAsync(
     // create cookie--
     createCookie(res, user);
     // send response to client--
-    const { password: _password, ...userDataWithPass } = user.toObject();
+    const { password: _password, ...userData } = user.toObject();
     res.status(httpStatus.OK).json({
       success: true,
       message: 'user logged in successfully',
-      data: userDataWithPass,
+      data: userData,
     });
   },
 );

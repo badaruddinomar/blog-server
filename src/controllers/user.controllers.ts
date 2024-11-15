@@ -1,8 +1,14 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import catchAsync from '../utils/catchAsyn';
 import httpStatus from 'http-status';
 import User from '../models/user.model';
-import { IUserSearchQuery } from '../interface/user.interface';
+import { IUser, IUserSearchQuery } from '../interface/user.interface';
+import { UploadedFile } from 'express-fileupload';
+import {
+  deleteSingleImage,
+  uploadSingleImage,
+} from '../utils/cloudinaryImageUpload';
+import AppError from '../utils/AppError';
 
 export const getAllUsers = catchAsync(async (req: Request, res: Response) => {
   const search = req.query.search as string;
@@ -32,3 +38,64 @@ export const getAllUsers = catchAsync(async (req: Request, res: Response) => {
     },
   });
 });
+
+export const getUser = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const user = await User.findById(id).select('-password');
+  res.status(httpStatus.OK).json({
+    success: true,
+    data: user,
+  });
+});
+
+export const updateUser = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+    const { name } = req.body;
+
+    const isExistsUser = await User.findById(id);
+    if (!isExistsUser) next(new AppError(400, 'User not found'));
+
+    // upload image--
+    let avatar;
+    if (req.files?.avatar) {
+      await deleteSingleImage(isExistsUser?.avatar.public_id as string);
+      avatar = await uploadSingleImage(
+        req.files?.avatar as UploadedFile,
+        'avatars',
+      );
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      { name, avatar: req.files?.avatar ? avatar : isExistsUser?.avatar },
+      {
+        new: true,
+        runValidators: true,
+      },
+    );
+
+    const { password: _password, ...userData } =
+      updatedUser?.toObject() as IUser;
+
+    res.status(httpStatus.OK).json({
+      success: true,
+      data: userData,
+    });
+  },
+);
+
+export const deleteUser = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+    const isUserExists = await User.findById(id);
+    if (!isUserExists) {
+      throw next(new AppError(400, 'User not found'));
+    }
+    await User.findByIdAndDelete(id);
+    res.status(httpStatus.OK).json({
+      message: 'User deleted successfully',
+      success: true,
+    });
+  },
+);
