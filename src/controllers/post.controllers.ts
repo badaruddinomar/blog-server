@@ -40,3 +40,11 @@ export const createPost = catchAsync(
     });
   },
 );
+
+export const getAllPosts = catchAsync(async (req: Request, res: Response) => {
+  const posts = await Post.find().sort({ createdAt: -1 });
+  res.status(httpStatus.OK).json({
+    success: true,
+    data: posts,
+  });
+});

@@ -1,5 +1,5 @@
 import express from 'express';
-import { createPost } from '../controllers/post.controllers';
+import { createPost, getAllPosts } from '../controllers/post.controllers';
 import { isAuthenticatedUser } from '../middleware/authGuard';
 import validateRequest from '../middleware/validateRequest';
 import { postSchema } from '../validation/post.validation';
@@ -12,5 +12,6 @@ router.post(
   validateRequest(postSchema),
   createPost,
 );
+router.get('/all', getAllPosts);
 
 export default router;
