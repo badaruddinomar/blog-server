@@ -9,6 +9,7 @@ import {
 import { UploadedFile } from 'express-fileupload';
 import { generateSlug } from '../utils/generateSlug';
 import AppError from '../utils/AppError';
+import { IPostQuery } from '../interface/post.interface';
 
 export const createPost = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -51,12 +52,15 @@ export const getAllPosts = catchAsync(async (req: Request, res: Response) => {
   const skip = (page - 1) * limit;
   const sort = req.query.sort === 'asc' ? 1 : -1;
 
-  const posts = await Post.find({
-    $or: [
+  let query: IPostQuery = {};
+  if (search) {
+    query.$or = [
       { title: { $regex: search, $options: 'i' } },
       { content: { $regex: search, $options: 'i' } },
-    ],
-  })
+    ];
+  }
+
+  const posts = await Post.find(query)
     .skip(skip)
     .limit(limit)
     .sort({ createdAt: sort });

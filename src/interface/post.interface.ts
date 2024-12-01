@@ -10,3 +10,13 @@ export interface IPost {
   category: string;
   slug: string;
 }
+type QueryCondition = {
+  $regex: string;
+  $options: string;
+};
+export interface IPostQuery {
+  $or?: Array<{
+    title?: QueryCondition;
+    content?: QueryCondition;
+  }>;
+}
