@@ -6,7 +6,7 @@ import Comment from '../models/comment.model';
 export const createComment = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { author, content, post } = req.body;
-    console.log(author, req.user._id.toString());
+
     if (author !== req.user._id.toString()) {
       return next(
         new AppError(403, 'You are not allowed to create this comment'),
@@ -29,7 +29,6 @@ export const createComment = catchAsync(
 export const getPostComments = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { postId } = req.query;
-    console.log(postId);
 
     if (!postId) {
       return next(new AppError(400, 'Post id is required'));
@@ -41,6 +40,39 @@ export const getPostComments = catchAsync(
       success: true,
       message: 'Comments retrieved successfully',
       data: comments,
+    });
+  },
+);
+
+export const likeUnlikeComment = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { commentId } = req.query;
+    if (!commentId) {
+      return next(new AppError(400, 'Comment id is required'));
+    }
+
+    const comment = await Comment.findById(commentId);
+
+    if (!comment) {
+      return next(new AppError(404, 'Comment not found'));
+    }
+
+    if (comment.likes.includes(req.user._id)) {
+      comment.likes = comment.likes.filter(
+        (like) => like.toString() !== req.user._id.toString(),
+      );
+      comment.numberOfLikes -= 1;
+    } else {
+      comment.likes.push(req.user._id);
+      comment.numberOfLikes += 1;
+    }
+
+    await comment.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Comment liked/unliked successfully',
+      data: comment,
     });
   },
 );
