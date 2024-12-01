@@ -25,3 +25,22 @@ export const createComment = catchAsync(
     });
   },
 );
+
+export const getPostComments = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { postId } = req.query;
+    console.log(postId);
+
+    if (!postId) {
+      return next(new AppError(400, 'Post id is required'));
+    }
+    const comments = await Comment.find({ post: postId }).sort({
+      createdAt: -1,
+    });
+    res.status(200).json({
+      success: true,
+      message: 'Comments retrieved successfully',
+      data: comments,
+    });
+  },
+);
