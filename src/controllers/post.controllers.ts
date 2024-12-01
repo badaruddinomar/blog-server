@@ -45,10 +45,34 @@ export const createPost = catchAsync(
 );
 
 export const getAllPosts = catchAsync(async (req: Request, res: Response) => {
-  const posts = await Post.find().sort({ createdAt: -1 });
+  const search = req.query.search as string;
+  const limit = parseInt(req.query.limit as string) || 10;
+  const page = parseInt(req.query.page as string) || 1;
+  const skip = (page - 1) * limit;
+  const sort = req.query.sort === 'asc' ? 1 : -1;
+
+  const posts = await Post.find({
+    $or: [
+      { title: { $regex: search, $options: 'i' } },
+      { content: { $regex: search, $options: 'i' } },
+    ],
+  })
+    .skip(skip)
+    .limit(limit)
+    .sort({ createdAt: sort });
+
+  const totalPosts = await Post.countDocuments();
+  const totalPages = Math.ceil(totalPosts / limit);
+
   res.status(httpStatus.OK).json({
     success: true,
     data: posts,
+    meta: {
+      total: totalPosts,
+      pages: totalPages,
+      currentPage: page,
+      limit,
+    },
   });
 });
 
