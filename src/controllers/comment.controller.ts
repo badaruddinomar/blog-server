@@ -116,3 +116,34 @@ export const editComment = catchAsync(
     });
   },
 );
+
+export const deleteComment = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+
+    if (!id) {
+      return next(new AppError(400, 'Comment id is required'));
+    }
+
+    const comment = await Comment.findById(id);
+    if (!comment) {
+      return next(new AppError(404, 'Comment not found'));
+    }
+
+    if (
+      comment.author.toString() === req.user._id.toString() ||
+      req.user.role === 'admin'
+    ) {
+      await Comment.findByIdAndDelete(id);
+    } else {
+      return next(
+        new AppError(403, 'You are not allowed to delete this comment'),
+      );
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Comment deleted successfully',
+    });
+  },
+);
