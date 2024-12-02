@@ -76,3 +76,43 @@ export const likeUnlikeComment = catchAsync(
     });
   },
 );
+
+export const editComment = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+
+    if (!id) {
+      return next(new AppError(400, 'Comment id is required'));
+    }
+    const comment = await Comment.findById(id);
+    if (!comment) {
+      return next(new AppError(404, 'Comment not found'));
+    }
+
+    let editedComment;
+    if (
+      comment.author.toString() === req.user._id.toString() ||
+      req.user.role === 'admin'
+    ) {
+      editedComment = await Comment.findByIdAndUpdate(
+        id,
+        {
+          content: req.body.content,
+        },
+        {
+          new: true,
+        },
+      );
+    } else {
+      return next(
+        new AppError(403, 'You are not allowed to edit this comment'),
+      );
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Comment edited successfully',
+      data: editedComment,
+    });
+  },
+);
